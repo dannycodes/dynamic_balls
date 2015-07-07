@@ -1,6 +1,6 @@
 "use strict"
 
-var balls;
+var ball;
 var canvas;
 var start = null;
 function draw()
@@ -10,9 +10,9 @@ function draw()
 	{
 		var ctx = canvas.getContext('2d');
 
-  	var test1 = new TestBall1();
-  	var test2 = new TestBall2();
-		balls = [ new TestBall1, new TestBall2]
+		var ball1 = new Ball(100,100,4,0,[0,0,255]);
+		var ball2 = new Ball(200,100,0,0,[0,255,0]);
+		ball = [ ball1, ball2 ]
 
 		var animation = window.requestAnimationFrame(step)
 
@@ -21,8 +21,18 @@ function draw()
 			if (!start) {start = timestamp};
 			var progress = timestamp - start;
 			ctx.clearRect(0,0,canvas.width, canvas.height);
+			ctx.beginPath();
+			ctx.arc(ball[0].loc.x,ball[0].loc.y, 30, 0, Math.PI * 2);
+			ctx.fillStyle = "rgb(0,255,0)";
+			// ctx.fillStyle = "rgb(" + ball[0].colors[0].toString() + "," + ball[0].colors[1].toString() + "," + ball[0].colors[2].toString() + ")" 
+			ctx.fill();
+			
+			ctx.beginPath();
+			ctx.arc(ball[1].loc.x,ball[1].loc.y, 30, 0, Math.PI * 2);
+			ctx.fillStyle =  "rgb(0,0,255)" 	
+			ctx.fill();
 
-			var dist = Math.sqrt(Math.pow(balls[0].loc.x - balls[1].loc.x,2) + Math.pow(balls[0].loc.y - balls[1].loc.y,2));
+			var dist = Math.sqrt(Math.pow(ball[0].loc.x - ball[1].loc.x,2) + Math.pow(ball[0].loc.y - ball[1].loc.y,2));
 			var overlap;
 			if (dist <= 60)
 			{
@@ -30,60 +40,54 @@ function draw()
 				overlap = true;
 			}
 			
-			var store_v = {};
-			balls.forEach(function (ball, index)
+
+			if (!overlap) 
 			{
-				// This will only work of there are two balls
-				var copy = balls.slice();
-				copy.splice(index,1);
-				var other_ball = copy[0];
-		
-				ctx.beginPath();
-				ctx.arc(ball.loc.x, ball.loc.y, 30, 0, Math.PI*2);
+				ctx.fillStyle = ball.colors
+			} else {		
+				var phi = tangent(ball[0].loc.y - ball[1].loc.y, ball[0].loc.x - ball[1].loc.x);
+				// console.log(phi)
+				console.log("Before: \n Ball 0: " + ball[0].vel.x + ", " + ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y)
 
-				
-				if (!overlap) 
-				{
-					ctx.fillStyle = ball.colors
-				} else {
-					
-					var other_theta = tangent(other_ball.vel.y, other_ball.vel.x);
-					var theta = tangent(ball.vel.y, ball.vel.x)
-					var phi = tangent(ball.loc.y - other_ball.loc.y, ball.loc.x - other_ball.loc.x);
-					var other_vel = vel(other_ball.vel.x, other_ball.vel.y);
-					var ball_vel = vel(ball.vel.x, ball.vel.y)
-					console.log(theta)
-					console.log(other_theta)
-					console.log(phi)
-					console.log("Before " + ball.vel.x +", " + ball.vel.y) 
-					store_v = {x: ball.vel.x, y: ball.vel.y}
-					ball.vel.x = Math.round((other_vel*Math.cos(other_theta - phi)*Math.cos(phi) 
-							- ball_vel*Math.sin(theta - phi) * Math.sin(phi))*100 / 100);
-					ball.vel.y = Math.round((other_vel*Math.cos(other_theta - phi)*Math.sin(phi) 
-							+	ball_vel*Math.sin(theta - phi) * Math.cos(phi))*100 / 100);
-					debugger;
-				};
+				console.log(ball[1].theta)
+				ball[0].vel.x = Math.round((ball[1].velVector*Math.cos(ball[1].theta - phi)*Math.cos(phi) 
+						- ball[0].velVector*Math.sin(ball[0].theta - phi) * Math.sin(phi))*100 / 100);
+				ball[0].vel.y = Math.round((ball[1].velVector*Math.cos(ball[1].theta - phi)*Math.sin(phi) 
+						+	ball[0].velVector*Math.sin(ball[0].theta  - phi) * Math.cos(phi))*100 / 100);
 
-				ctx.fill();
+				ball[1].vel.x = Math.round((ball[0].velVector*Math.cos(ball[0].theta - phi)*Math.cos(phi) 
+						- ball[1].velVector*Math.sin(ball[1].theta - phi) * Math.sin(phi))*100 / 100);
+				ball[1].vel.y = Math.round((ball[0].velVector*Math.cos(ball[0].theta - phi)*Math.sin(phi) 
+						+	ball[1].velVector*Math.sin(ball[1].theta  - phi) * Math.cos(phi))*100 / 100);
 
-				if (ball.loc.x >= (canvas.width-30) || ball.loc.x <= 30)
-				{
-					ball.vel.x = -ball.vel.x
-				} 
-				if (ball.loc.y <= 30 || ball.loc.y >= (canvas.height-30))
-				{
-					ball.vel.y = -ball.vel.y
-				}
-			})
-			
+				// ball[0].vel.x = 
+				console.log("After: \n Ball 0: " + ball[0].vel.x + ", " + ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y)				
+			};
 
-		
-			balls[0].loc.x += balls[0].vel.x;
-			balls[0].loc.y += balls[0].vel.y;
-			balls[1].loc.x += balls[1].vel.x;
-			balls[1].loc.y += balls[1].vel.y;
+			if (ball[0].loc.x >= (canvas.width-30) || ball[0].loc.x <= 30)
+			{
+				ball[0].vel.x = -ball[0].vel.x
+			} 
+			if (ball[0].loc.y <= 30 || ball[0].loc.y >= (canvas.height-30))
+			{
+				ball[0].vel.y = -ball[0].vel.y
+			}
 
-			if (progress < 1000) 
+			if (ball[1].loc.x >= (canvas.width-30) || ball[1].loc.x <= 30)
+			{
+				ball[1].vel.x = -ball[1].vel.x
+			} 
+			if (ball[1].loc.y <= 30 || ball[1].loc.y >= (canvas.height-30))
+			{
+				ball[1].vel.y = -ball[1].vel.y
+			}
+
+			ball[0].loc.x += ball[0].vel.x;
+			ball[0].loc.y += ball[0].vel.y;
+			ball[1].loc.x += ball[1].vel.x;
+			ball[1].loc.y += ball[1].vel.y;
+
+			if (progress < 2000) 
 			{
 				window.requestAnimationFrame(step)	
 			}
@@ -93,27 +97,25 @@ function draw()
 
 function vel(x,y)
 {
-	return Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2))*100) / 100;
+	var velVector = Math.round(Math.sqrt(Math.pow(x,2) + Math.pow(y,2))*100) / 100;
+	console.log(velVector);
+	return velVector
 }
 function tangent(y,x)
 {
 	return Math.round(Math.atan2(y,x) * 100) / 100;
 }	
-function Ball()
+// function Ball()
+// {
+// 	this.loc = { x : Math.floor((Math.random()* (w-100)) + 50), y : Math.floor((Math.random()*(h-100)) + 50) }
+// 	this.vel = { x : Math.floor(Math.random() * 4 + 1), y : Math.floor(Math.random() * 4 + 1) }
+// 	this.colors = [0, Math.floor(Math.random()*40), Math.floor(Math.random()*255)]
+// }
+function Ball(loc_x, loc_y, vel_x, vel_y, color)
 {
-	this.loc = { x : Math.floor((Math.random()* (w-100)) + 50), y : Math.floor((Math.random()*(h-100)) + 50) }
-	this.vel = { x : Math.floor(Math.random() * 4 + 1), y : Math.floor(Math.random() * 4 + 1) }
-	this.colors = [0, Math.floor(Math.random()*40), Math.floor(Math.random()*255)]
-}
-function TestBall1()
-{
-	this.loc = { x : 100, y : 100 }
-	this.vel = { x : 4, y : 0 }
-	this.colors = "rgb(0,0,255)"
-}
-function TestBall2()
-{
-	this.loc = { x : 200, y : 100 }
-	this.vel = { x : 0, y : 0 }
-	this.colors = "rgb(0,255,0)"
+	this.loc = { x : loc_x, y : loc_y };
+	this.vel = { x : vel_x, y : vel_y };
+	this.velVector = Math.round(Math.sqrt(Math.pow(vel_x,2) + Math.pow(vel_y,2))*100) / 100;
+	this.theta = Math.round(Math.atan2(vel_y,vel_x) * 100) / 100;
+	this.colors = "rgb(," + color[0] + ", " + color[1] + ", " + color[2] + ")";
 }

@@ -34,3 +34,44 @@
 
 				// console.log("After Collision vels are "  + ball.vel.x.toString() + ", " + ball.vel.y.toString() + " for ball 1 and " + 
 				// 	ball2.vel.x.toString() + ", " + ball2.vel.y.toString());
+
+// balls.forEach(function (ball, index)
+// {
+// 	// This will only work of there are two balls
+// 	var copy = balls.slice();
+// 	copy.splice(index,1);
+// 	var other_ball = copy[0];
+
+// 	ctx.beginPath();
+// 	ctx.arc(ball.loc.x, ball.loc.y, 30, 0, Math.PI*2);
+
+	
+// 	if (!overlap) 
+// 	{
+// 		ctx.fillStyle = ball.colors
+// 	} else {		
+// 		var phi = tangent(ball.loc.y - other_ball.loc.y, ball.loc.x - other_ball.loc.x);
+
+// 		console.log(theta)
+// 		console.log(other_theta)
+// 		console.log(phi)
+// 		console.log("Before " + ball.vel.x +", " + ball.vel.y) 
+// 		store_v = {x: ball.vel.x, y: ball.vel.y}
+// 		ball.vel.x = Math.round((other_vel*Math.cos(other_theta - phi)*Math.cos(phi) 
+// 				- ball_vel*Math.sin(theta - phi) * Math.sin(phi))*100 / 100);
+// 		ball.vel.y = Math.round((other_vel*Math.cos(other_theta - phi)*Math.sin(phi) 
+// 				+	ball_vel*Math.sin(theta - phi) * Math.cos(phi))*100 / 100);
+// 		debugger;
+// 	};
+
+// 	ctx.fill();
+
+// 	if (ball.loc.x >= (canvas.width-30) || ball.loc.x <= 30)
+// 	{
+// 		ball.vel.x = -ball.vel.x
+// 	} 
+// 	if (ball.loc.y <= 30 || ball.loc.y >= (canvas.height-30))
+// 	{
+// 		ball.vel.y = -ball.vel.y
+// 	}
+// })
