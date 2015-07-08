@@ -75,3 +75,32 @@
 // 		ball.vel.y = -ball.vel.y
 // 	}
 // })
+
+
+// FROM LAST WORKING RUN THROUGH
+
+// var phi_vector = Math.round(Math.sqrt(Math.pow(ball[1].loc.y - ball[0].loc.y,2) + Math.pow(ball[1].loc.x - ball[0].loc.x,2))*100) / 100;
+// var chg_x = Math.round(Math.abs(ball[1].loc.x - ball[0].loc.x) * 100) / 100;
+// var chg_y = Math.round(Math.abs(ball[1].loc.y - ball[0].loc.y) * 100) / 100;
+
+// console.log(chg_x)
+// var x0 = ball[0].vel.x;
+// var y0 = ball[0].vel.y;
+
+// var x1 = ball[1].vel.x;
+// var y1 = ball[1].vel.y;
+// ball[0].vel.x = Math.round( 
+// 	( (x1 * chg_x + y1 * chg_y) * chg_x / Math.pow(phi_vector,2) 
+// 	+ (y0 * chg_x - x0 * chg_y) * chg_y / Math.pow(phi_vector,2) ) * 100 ) / 100
+
+// ball[0].vel.y = Math.round(
+// 	( (x1 * chg_x + y1 * chg_y) * chg_y / Math.pow(phi_vector,2)
+// 	- (y0 * chg_x - x0 * chg_y) * chg_x / Math.pow(phi_vector,2) ) * 100 ) / 100 
+
+// ball[1].vel.x = Math.round( 
+// 	( (x0 * chg_x + y0 * chg_y) * chg_x / Math.pow(phi_vector,2) 
+// 	+ (y1 * chg_x - x1 * chg_y) * chg_y / Math.pow(phi_vector,2) ) * 100 ) / 100
+
+// ball[1].vel.y = Math.round( 
+// 	( (x0 * chg_x + y0 * chg_y) * chg_y / Math.pow(phi_vector,2) 
+// 	- (y1 * chg_x - x1 * chg_y) * chg_x / Math.pow(phi_vector,2) ) * 100 ) / 100

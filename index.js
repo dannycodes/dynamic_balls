@@ -10,8 +10,9 @@ function draw()
 	{
 		var ctx = canvas.getContext('2d');
 
-		var ball1 = new Ball(100,100,2,1,[0,0,255]);
-		var ball2 = new Ball(200,200,4,4,[0,255,0]);
+
+		var ball1 = new Ball(100,100,1,3,[0,0,255]);
+		var ball2 = new Ball(100,300,3,4,[0,255,0]);
 		ball = [ ball1, ball2 ]
 
 		var animation = window.requestAnimationFrame(step)
@@ -32,76 +33,58 @@ function draw()
 			ctx.fillStyle =  "rgb(0,0,255)" 	
 			ctx.fill();
 
+			// ctx.beginPath();
+			// ctx.moveTo(ball[0].loc.x, ball[0].loc.y);
+			// ctx.lineTo(ball[1].loc.x, ball[1].loc.y);
+			// var xTip = ball[1].loc.x + ball[1].vel.x*10
+			// var yTip = ball[1].loc.y + ball[1].vel.y*10
+			// ctx.lineTo(ball[1].loc.x + ball[1].vel.x*10, ball[1].loc.y + ball[1].vel.y*10);
+
+
+			// ctx.moveTo(ball[0].loc.x, ball[0].loc.y);
+			// ctx.lineTo(ball[0].loc.x + ball[0].vel.x*10, ball[0].loc.y + ball[0].vel.y*10);
+
+			// ctx.strokeStyle = "#000";
+			// ctx.lineWidth = 2;
+			// ctx.stroke();
+
 			var dist = Math.sqrt(Math.pow(ball[0].loc.x - ball[1].loc.x,2) + Math.pow(ball[0].loc.y - ball[1].loc.y,2));
 			var overlap;
 			if (dist <= 60)
 			{
 				ctx.fillStyle = "rgb(255,0,0)" 	
-				overlap = true;
-			}
-			
+				overlap = true;	
+				var n = (new Victor(ball[1].loc.x - ball[0].loc.x, ball[1].loc.y - ball[0].loc.y)).normalize();
+				var n_perp = new Victor(-n.clone().y, n.clone().x);
 
-			if (!overlap) 
-			{
-				ctx.fillStyle = ball.colors
-			} else {		
+				console.dir(n);
+				console.dir(n_perp)
+				// Copy so first update doesn't jank the rest of the calculations
+				var initial_v0 = ball[0].vel.clone();
+				var initial_v1 = ball[1].vel.clone();
 
-				var phi_vector = Math.round(Math.sqrt(Math.pow(ball[1].loc.y - ball[0].loc.y,2) + Math.pow(ball[1].loc.x - ball[0].loc.x,2))*100) / 100;
-				var chg_x = Math.round(Math.abs(ball[1].loc.x - ball[0].loc.x) * 100) / 100;
-				var chg_y = Math.round(Math.abs(ball[1].loc.y - ball[0].loc.y) * 100) / 100;
+				console.log("Before: \n Ball 0: " + ball[0].vel.x + ", " 
+					+ ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y)
 
-				// var v0 = velVector(ball[0].vel.x, ball[0].vel.y);
-				// var v1 = velVector(ball[1].vel.x, ball[1].vel.y);
-				// console.log(phi)
-				console.log("Before: \n Ball 0: " + ball[0].vel.x + " \n Ball 1: " + ball[1].vel.x)
+				var v0_other = Victor.fromArray([initial_v0.clone().dot(n),initial_v0.clone().dot(n)]).multiply(n);
+				console.log(v0_other);
+				var v1_other = Victor.fromArray([initial_v1.clone().dot(n),initial_v1.clone().dot(n)]).multiply(n);
+				var v0_self = Victor.fromArray([initial_v0.clone().dot(n_perp),initial_v0.clone().dot(n_perp)]).multiply(n_perp);
+				console.log(v0_self)
+				console.log(n_perp)
+				console.log(initial_v0.clone().dot(n_perp))
+				var v1_self = Victor.fromArray([initial_v1.clone().dot(n_perp),initial_v1.clone().dot(n_perp)]).multiply(n_perp);
 
-				// console.log(ball[1].theta)  Math.cos(ball[1].theta - phi)
-				console.log(chg_x)
-				var x0 = ball[0].vel.x;
-				var y0 = ball[0].vel.y;
+				ball[1].vel = v0_other.add(v1_self);
+				ball[0].vel = (v1_other).add(v0_self);
+	
+				// ball[0].vel.x = 0 
+				// ball[0].vel.y = 0
 
-				var x1 = ball[1].vel.x;
-				var y1 = ball[1].vel.y;
-				// ball[0].vel.x = Math.round(
-				// 	ball[1].vel.x * chg_x * chg_x / Math.pow(phi_vector,2) * 100 ) / 100
+				// ball[1].vel.x = 0
+				// ball[1].vel.y = 0
 
-				// ball[1].vel.x = Math.round( 
-				// 	store.x * chg_x  * chg_x / Math.pow(phi_vector,2) * 100 ) / 100
-				
-				// console.log(store.x)
-				ball[0].vel.x = Math.round( 
-					( (x1 * chg_x + y1 * chg_y) * chg_x / Math.pow(phi_vector,2) 
-					+ (y0 * chg_x - x0 * chg_y) * chg_y / Math.pow(phi_vector,2) ) * 100 ) / 100
-
-				ball[0].vel.y = Math.round(
-					( (x1 * chg_x + y1 * chg_y) * chg_y / Math.pow(phi_vector,2)
-					- (y0 * chg_x - x0 * chg_y) * chg_x / Math.pow(phi_vector,2) ) * 100 ) / 100 
-
-				ball[1].vel.x = Math.round( 
-					( (x0 * chg_x + y0 * chg_y) * chg_x / Math.pow(phi_vector,2) 
-					+ (y1 * chg_x - x1 * chg_y) * chg_y / Math.pow(phi_vector,2) ) * 100 ) / 100
-
-				ball[1].vel.y = Math.round( 
-					( (x0 * chg_x + y0 * chg_y) * chg_y / Math.pow(phi_vector,2) 
-					- (y1 * chg_x - x1 * chg_y) * chg_x / Math.pow(phi_vector,2) ) * 100 ) / 100
-
-				// ball[0].vel.x = Math.round( velVector(ball[1].vel.x, ball[1].vel.y) * (cos(ball[1].vel.x, ball[1].vel.y)*phi_cos + sin(ball[1].vel.x, ball[1].vel.y)*phi_sin) * phi_cos
-				// 		- velVector(ball[0].vel.x, ball[0].vel.y)* (sin(ball[0].vel.x, ball[0].vel.y)*phi_cos - cos(ball[0].vel.x, ball[0].vel.y)*phi_sin) * phi_sin ) * 100 / 100;
-
-				// ball[0].vel.y = ball[0].vel.y
-
-				// // Math.round(ball[1].velVector*ball[1].cos*(phi_cos + phi_sin)*phi_sin 
-				// 		// +	ball[0].velVector*ball[0].sin*(phi_cos - phi_sin) * phi_cos)*100 / 100;
-
-				// ball[1].vel.x = Math.round( velVector(ball[0].vel.x, ball[0].vel.y) * (cos(ball[0].vel.x, ball[0].vel.y)*phi_cos + sin(ball[0].vel.x, ball[0].vel.y)*phi_sin) * phi_cos
-				// 		- velVector(ball[1].vel.x, ball[1].vel.y)* (sin(ball[1].vel.x, ball[1].vel.y)*phi_cos - cos(ball[1].vel.x, ball[1].vel.y)*phi_sin) * phi_sin ) * 100 / 100;
-
-				// ball[1].vel.y = ball[1].vel.y
-				// Math.round((ball[0].velVector*ball[0].cos*(phi_cos + phi_sin)*phi_sin 
-						// +	ball[1].velVector*ball[1].sin*(phi_cos - phi_sin) *phi_cos)*100 / 100);
-
-				// ball[0].vel.x = 
-				console.log("After: \n Ball 0: " + ball[0].vel.x + " \n Ball 1: " + ball[1].vel.x )				
+				console.log("After: \n Ball 0: " + ball[0].vel.x + ", " + ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y )			
 			};
 
 			if (ball[0].loc.x >= (canvas.width-30) || ball[0].loc.x <= 30)
@@ -147,8 +130,8 @@ function draw()
 // }
 function Ball(loc_x, loc_y, vel_x, vel_y, color)
 {
-	this.loc = { x : loc_x, y : loc_y };
-	this.vel = { x : vel_x, y : vel_y };
+	this.loc = Victor(loc_x, loc_y)
+	this.vel = Victor(vel_x, vel_y)
 	this.colors = "rgb(," + color[0] + ", " + color[1] + ", " + color[2] + ")";
 }
 
