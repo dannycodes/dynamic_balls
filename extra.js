@@ -104,3 +104,50 @@
 // ball[1].vel.y = Math.round( 
 // 	( (x0 * chg_x + y0 * chg_y) * chg_y / Math.pow(phi_vector,2) 
 // 	- (y1 * chg_x - x1 * chg_y) * chg_x / Math.pow(phi_vector,2) ) * 100 ) / 100
+
+// if (dist <= 60)
+// {
+// 	var n = (new Victor(ball[1].loc.x - ball[0].loc.x, ball[1].loc.y - ball[0].loc.y)).normalize();
+// 	var n_perp = new Victor(-n.clone().y, n.clone().x);
+
+// 	// Copy so first update doesn't jank the rest of the calculations
+// 	var initial_v0 = ball[0].vel.clone();
+// 	var initial_v1 = ball[1].vel.clone();
+
+// 	console.log("Before: \n Ball 0: " + ball[0].vel.x + ", " 
+// 		+ ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y)
+
+// 	var v0_other = Victor.fromArray([initial_v0.clone().dot(n),initial_v0.clone().dot(n)]).multiply(n);
+// 	var v1_other = Victor.fromArray([initial_v1.clone().dot(n),initial_v1.clone().dot(n)]).multiply(n);
+// 	var v0_self = Victor.fromArray([initial_v0.clone().dot(n_perp),initial_v0.clone().dot(n_perp)]).multiply(n_perp);
+// 	console.log(initial_v0.clone().dot(n_perp))
+// 	var v1_self = Victor.fromArray([initial_v1.clone().dot(n_perp),initial_v1.clone().dot(n_perp)]).multiply(n_perp);
+
+// 	ball[1].vel = v0_other.add(v1_self);
+// 	ball[0].vel = (v1_other).add(v0_self);
+
+// 	console.log("After: \n Ball 0: " + ball[0].vel.x + ", " + ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y )			
+// };
+
+// if (ball[0].loc.x >= (canvas.width-30) || ball[0].loc.x <= 30)
+// {
+// 	ball[0].vel.x = -ball[0].vel.x
+// } 
+// if (ball[0].loc.y <= 30 || ball[0].loc.y >= (canvas.height-30))
+// {
+// 	ball[0].vel.y = -ball[0].vel.y
+// }
+
+// if (ball[1].loc.x >= (canvas.width-30) || ball[1].loc.x <= 30)
+// {
+// 	ball[1].vel.x = -ball[1].vel.x
+// } 
+// if (ball[1].loc.y <= 30 || ball[1].loc.y >= (canvas.height-30))
+// {
+// 	ball[1].vel.y = -ball[1].vel.y
+// }
+
+// ball[0].loc.x += ball[0].vel.x;
+// ball[0].loc.y += ball[0].vel.y;
+// ball[1].loc.x += ball[1].vel.x;
+// ball[1].loc.y += ball[1].vel.y;

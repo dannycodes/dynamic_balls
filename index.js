@@ -1,19 +1,62 @@
 "use strict"
 
-var ball;
+var num_balls = 4;
+
+document.addEventListener("DOMContentLoaded", function (event)
+{
+	console.log("Fully Loaded");
+	var select = document.getElementById("select");
+	var opt = document.createElement('option');
+	for (var i=1;i<10; i++)
+	{
+		var opt = document.createElement('option')
+		if (i == 4)
+		{
+			opt.setAttribute('selected', true);
+		}
+		var textNode = document.createTextNode(i.toString());
+		opt.appendChild(textNode)
+		select.appendChild(opt)
+	}
+
+	var qty = document.getElementById('qty');
+	var start = document.getElementById('start');
+	console.log(start)
+	
+	
+	qty.addEventListener("click", function () { get_qty() }, false);
+	start.addEventListener("click", function () { run(num_balls) }, false);
+});
+
+function get_qty ()
+{
+	var select = document.getElementById("select")
+	if (select.selectedIndex == -1)
+	{
+		alert("Please select a ball #");
+		return null
+	}
+	var integer = parseInt(select.options[select.selectedIndex].text)
+	num_balls = integer;
+}
+
+var balls = [];
 var canvas;
 var start = null;
-function draw()
+function run(num)
 {
 	canvas = document.getElementById("canvas");
 	if (canvas.getContext)
 	{
 		var ctx = canvas.getContext('2d');
 
-
-		var ball1 = new Ball(100,100,1,3,[0,0,255]);
-		var ball2 = new Ball(100,300,3,4,[0,255,0]);
-		ball = [ ball1, ball2 ]
+		
+		for (var i=0;i<num;i++)
+		{
+			var ball = generate_ball(balls, i);
+			balls.push(ball)
+		}
+		
 
 		var animation = window.requestAnimationFrame(step)
 
@@ -22,16 +65,58 @@ function draw()
 			if (!start) {start = timestamp};
 			var progress = timestamp - start;
 			ctx.clearRect(0,0,canvas.width, canvas.height);
-			ctx.beginPath();
-			ctx.arc(ball[0].loc.x,ball[0].loc.y, 30, 0, Math.PI * 2);
-			ctx.fillStyle = "rgb(0,255,0)";
-			// ctx.fillStyle = "rgb(" + ball[0].colors[0].toString() + "," + ball[0].colors[1].toString() + "," + ball[0].colors[2].toString() + ")" 
-			ctx.fill();
-			
-			ctx.beginPath();
-			ctx.arc(ball[1].loc.x,ball[1].loc.y, 30, 0, Math.PI * 2);
-			ctx.fillStyle =  "rgb(0,0,255)" 	
-			ctx.fill();
+
+			balls.map(function (ball, index, originalArray)
+			{
+				// http://stackoverflow.com/questions/12104226/pairwise-combinations-of-entries-in-a-javascript-array
+				var tmp = originalArray.map(function (_ball)
+				{
+					if (ball != _ball)
+					{
+						var dist =  Math.sqrt(Math.pow(ball.loc.x - _ball.loc.x,2) + Math.pow(ball.loc.y - _ball.loc.y,2));
+						if (dist <= 60)
+						{
+							var n = (new Victor(_ball.loc.x - ball.loc.x, _ball.loc.y - ball.loc.y)).normalize();
+							var n_perp = new Victor(-n.clone().y, n.clone().x);
+
+							// Copy so first update doesn't jank the rest of the calculations
+							var initial_v0 = ball.vel.clone();
+							var initial_v1 = _ball.vel.clone();
+
+							// console.log("Before: \n Ball 0: " + ball.vel.x + ", " 
+								// + ball.vel.y + " \n Ball 1: " + _ball.vel.x + ", " + _ball.vel.y)
+
+							var v0_other = Victor.fromArray([initial_v0.clone().dot(n),initial_v0.clone().dot(n)]).multiply(n);
+							var v1_other = Victor.fromArray([initial_v1.clone().dot(n),initial_v1.clone().dot(n)]).multiply(n);
+							var v0_self = Victor.fromArray([initial_v0.clone().dot(n_perp),initial_v0.clone().dot(n_perp)]).multiply(n_perp);
+							console.log(initial_v0.clone().dot(n_perp))
+							var v1_self = Victor.fromArray([initial_v1.clone().dot(n_perp),initial_v1.clone().dot(n_perp)]).multiply(n_perp);
+
+							_ball.vel = v0_other.add(v1_self);
+							ball.vel = (v1_other).add(v0_self);
+
+							// console.log("After: \n Ball 0: " + ball.vel.x + ", " + ball.vel.y + " \n Ball 1: " + _ball.vel.x + ", " + _ball.vel.y )						
+						}
+					}
+				});
+
+				if (ball.loc.x >= (canvas.width-30) || ball.loc.x <= 30)
+				{
+					ball.vel.x = -ball.vel.x
+				} 
+				if (ball.loc.y <= 30 || ball.loc.y >= (canvas.height-30))
+				{
+					ball.vel.y = -ball.vel.y
+				}
+
+				ctx.beginPath();
+				ctx.arc(ball.loc.x,ball.loc.y, 30, 0, Math.PI * 2);
+				ctx.fillStyle = "rgb(" + ball.colors[0].toString() + "," + ball.colors[1].toString() + "," + ball.colors[2].toString() + ")" 
+				ctx.fill();
+
+				ball.loc.x += ball.vel.x;
+				ball.loc.y += ball.vel.y;
+			});
 
 			// ctx.beginPath();
 			// ctx.moveTo(ball[0].loc.x, ball[0].loc.y);
@@ -48,67 +133,6 @@ function draw()
 			// ctx.lineWidth = 2;
 			// ctx.stroke();
 
-			var dist = Math.sqrt(Math.pow(ball[0].loc.x - ball[1].loc.x,2) + Math.pow(ball[0].loc.y - ball[1].loc.y,2));
-			var overlap;
-			if (dist <= 60)
-			{
-				ctx.fillStyle = "rgb(255,0,0)" 	
-				overlap = true;	
-				var n = (new Victor(ball[1].loc.x - ball[0].loc.x, ball[1].loc.y - ball[0].loc.y)).normalize();
-				var n_perp = new Victor(-n.clone().y, n.clone().x);
-
-				console.dir(n);
-				console.dir(n_perp)
-				// Copy so first update doesn't jank the rest of the calculations
-				var initial_v0 = ball[0].vel.clone();
-				var initial_v1 = ball[1].vel.clone();
-
-				console.log("Before: \n Ball 0: " + ball[0].vel.x + ", " 
-					+ ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y)
-
-				var v0_other = Victor.fromArray([initial_v0.clone().dot(n),initial_v0.clone().dot(n)]).multiply(n);
-				console.log(v0_other);
-				var v1_other = Victor.fromArray([initial_v1.clone().dot(n),initial_v1.clone().dot(n)]).multiply(n);
-				var v0_self = Victor.fromArray([initial_v0.clone().dot(n_perp),initial_v0.clone().dot(n_perp)]).multiply(n_perp);
-				console.log(v0_self)
-				console.log(n_perp)
-				console.log(initial_v0.clone().dot(n_perp))
-				var v1_self = Victor.fromArray([initial_v1.clone().dot(n_perp),initial_v1.clone().dot(n_perp)]).multiply(n_perp);
-
-				ball[1].vel = v0_other.add(v1_self);
-				ball[0].vel = (v1_other).add(v0_self);
-	
-				// ball[0].vel.x = 0 
-				// ball[0].vel.y = 0
-
-				// ball[1].vel.x = 0
-				// ball[1].vel.y = 0
-
-				console.log("After: \n Ball 0: " + ball[0].vel.x + ", " + ball[0].vel.y + " \n Ball 1: " + ball[1].vel.x + ", " + ball[1].vel.y )			
-			};
-
-			if (ball[0].loc.x >= (canvas.width-30) || ball[0].loc.x <= 30)
-			{
-				ball[0].vel.x = -ball[0].vel.x
-			} 
-			if (ball[0].loc.y <= 30 || ball[0].loc.y >= (canvas.height-30))
-			{
-				ball[0].vel.y = -ball[0].vel.y
-			}
-
-			if (ball[1].loc.x >= (canvas.width-30) || ball[1].loc.x <= 30)
-			{
-				ball[1].vel.x = -ball[1].vel.x
-			} 
-			if (ball[1].loc.y <= 30 || ball[1].loc.y >= (canvas.height-30))
-			{
-				ball[1].vel.y = -ball[1].vel.y
-			}
-
-			ball[0].loc.x += ball[0].vel.x;
-			ball[0].loc.y += ball[0].vel.y;
-			ball[1].loc.x += ball[1].vel.x;
-			ball[1].loc.y += ball[1].vel.y;
 
 			if (progress < 50000) 
 			{				// ball[0].vel.x = Math.round(
@@ -128,39 +152,46 @@ function draw()
 // 	this.vel = { x : Math.floor(Math.random() * 4 + 1), y : Math.floor(Math.random() * 4 + 1) }
 // 	this.colors = [0, Math.floor(Math.random()*40), Math.floor(Math.random()*255)]
 // }
-function Ball(loc_x, loc_y, vel_x, vel_y, color)
+function Ball(id, loc_x, loc_y, vel_x, vel_y, color)
 {
-	this.loc = Victor(loc_x, loc_y)
-	this.vel = Victor(vel_x, vel_y)
-	this.colors = "rgb(," + color[0] + ", " + color[1] + ", " + color[2] + ")";
+	this.id = id
+	this.loc = new Victor(loc_x, loc_y)
+	this.vel = new Victor(vel_x, vel_y)
+	this.colors = color
 }
 
-function velVector ( vel_x, vel_y)
+function generate_ball(all_balls, id)
 {
-	var velVector = Math.round(Math.sqrt(Math.pow(vel_x,2) + Math.pow(vel_y,2))*100) / 100;
-	return velVector
-}
+	var ball = instantiate_ball(id);
 
-function cos (vel_x, vel_y)
-{
-	var cos;
-	if (vel_x == 0 && vel_y == 0)
+	if (all_balls.length < 2)
 	{
-		cos = 0;
+		return ball
 	} else {
-		cos = Math.round(vel_x / Math.sqrt(Math.pow(vel_x,2) + Math.pow(vel_y,2)) * 100) / 100;
+		console.log(all_balls)
+		all_balls.map(function (_ball)
+		{
+			// http://stackoverflow.com/questions/12104226/pairwise-combinations-of-entries-in-a-javascript-array
+			if (ball.id != _ball.id)
+			{
+				while ((Math.abs(ball.loc.x-_ball.loc.x) < 80) || (Math.abs(ball.loc.y-_ball.loc.y)) < 80)
+				{
+					ball = instantiate_ball(id);
+				} 
+			}
+		});
+		return ball
 	}
-	return cos
 }
 
-function sin (vel_x, vel_y)
+function instantiate_ball (id)
 {
-	var sin;
-	if (vel_x == 0 && vel_y == 0)
-	{
-		sin = 0;
-	} else {
-		var sin = Math.round(vel_y / Math.sqrt(Math.pow(vel_x,2) + Math.pow(vel_y, 2)) * 100) / 100;
-	}
-	return sin
+	var ball = new Ball( 
+				id,
+				Math.random()*(canvas.width - 100) + 50, 
+				Math.random()*(canvas.height - 100) + 50, 
+				Math.random()*3 + 1, 
+				Math.random()*3 + 1, 
+			 	[Math.random(255), Math.random(255), Math.random(255)])
+	return ball
 }
