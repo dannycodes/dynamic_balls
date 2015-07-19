@@ -5,19 +5,66 @@
 	<title>Bouncing Balls</title>
 	<script src="./victor-0.2.6/build/victor.js"></script>
 	<script src="./index.js"></script>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<link rel='stylesheet' src="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
+	<style>
+		#canvas 
+		{
+			border:1px solid black;
+			margin: 0px auto;
+			display:block;
+		}
+		.center 
+		{
+			text-align: center;
+		}
+		.pad-top
+		{
+			margin-top:15px;
+		}
+		.pad-bottom
+		{
+			margin-bottom:40px;
+		}
+	</style>
 </head>
 <body>
-	<div class="fill">
-	<canvas id="canvas" height="500px" width="800px">
-		Oops, looks like your browser doesn't support canvas.
-	</canvas>
+	<div class="container">
+		<div class="row">
+			<div class="col-md 12">
+				<div class="page-header center">
+					<h1> Dynamic Ball Simulation <small> A canvas animation </small></h1>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<canvas id="canvas" height="360px" width="800px">
+					Oops, looks like your browser doesn't support canvas.
+				</canvas>
+			</div>
+		</div>
+		<div class="row pad-bottom">
+			<div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
+				<div class="pad-top">
+					<div class="pull-left">
+					<button class="btn btn-success" id="start">Start or Refresh Simulation</button>
+
+					<button class="btn btn-warning" id="stop">Stop</button>
+					<button class="btn btn-info" id="resume">Resume</button>
+
+					
+					</div>
+					<div class="pull-right">
+						<label for="select">Select Number of Balls</label>
+						<select class="btn" id="select">
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<button id="start">Start Simulation</button>
-	<label for="select">Select Number of Balls</label>
-	<select id="select">
-	</select>
-	<button id="qty">Submit</button>
-	</div>
+	
 </body>
 </html>
