@@ -1,6 +1,9 @@
 "use strict"
 
 var num_balls = 4;
+var balls = [];
+var canvas;
+var start = null;
 
 document.addEventListener("DOMContentLoaded", function (event)
 {
@@ -40,11 +43,9 @@ function get_qty ()
 	num_balls = integer;
 }
 
-var balls = [];
-var canvas;
-var start = null;
 function run(num)
 {
+	balls = [];
 	canvas = document.getElementById("canvas");
 	if (canvas.getContext)
 	{
@@ -111,7 +112,7 @@ function run(num)
 
 				ctx.beginPath();
 				ctx.arc(ball.loc.x,ball.loc.y, 30, 0, Math.PI * 2);
-				ctx.fillStyle = "rgb(" + ball.colors[0].toString() + "," + ball.colors[1].toString() + "," + ball.colors[2].toString() + ")" 
+				ctx.fillStyle = 'rgb(' + Math.floor(ball.colors[0]) + ', ' + Math.floor(ball.colors[1]) + ', ' + Math.floor(ball.colors[2]) + ' )';
 				ctx.fill();
 
 				ball.loc.x += ball.vel.x;
@@ -192,6 +193,6 @@ function instantiate_ball (id)
 				Math.random()*(canvas.height - 100) + 50, 
 				Math.random()*3 + 1, 
 				Math.random()*3 + 1, 
-			 	[Math.random(255), Math.random(255), Math.random(255)])
+			 	[Math.random()*255, Math.random()*255, Math.random()*255])
 	return ball
 }
